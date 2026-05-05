@@ -6,10 +6,13 @@ Fase 2 agrega un frontend React + Vite con dashboard operativo, KPIs, tabla y ma
 
 Fase 3 agrega subida local de evidencia fotografica y eventos `PHOTO_UPLOADED`.
 
+Fase 4 agrega OCR/IA desacoplado para procesar evidencia, con mock provider local y provider OpenAI preparado.
+
 Documentacion:
 
 - [docs/fase-2-frontend-map.md](docs/fase-2-frontend-map.md)
 - [docs/fase-3-subida-fotos.md](docs/fase-3-subida-fotos.md)
+- [docs/fase-4-ocr-ia.md](docs/fase-4-ocr-ia.md)
 
 ## Ejecucion
 

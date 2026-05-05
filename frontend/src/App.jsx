@@ -10,6 +10,7 @@ const routes = {
 function App() {
   const [path, setPath] = useState(window.location.pathname)
   const [refreshKey, setRefreshKey] = useState(0)
+  const [lastEvidenceEventId, setLastEvidenceEventId] = useState('')
 
   useEffect(() => {
     function handlePopState() {
@@ -25,7 +26,10 @@ function App() {
     setPath(nextPath)
   }
 
-  function handleUploadComplete() {
+  function handleUploadComplete(result) {
+    if (result?.event_id) {
+      setLastEvidenceEventId(result.event_id)
+    }
     setRefreshKey((current) => current + 1)
   }
 
@@ -63,7 +67,7 @@ function App() {
         </div>
       </header>
       {currentPath === routes.evidence ? (
-        <Evidence onUploadComplete={handleUploadComplete} />
+        <Evidence lastEvidenceEventId={lastEvidenceEventId} onUploadComplete={handleUploadComplete} />
       ) : (
         <Dashboard refreshKey={refreshKey} />
       )}

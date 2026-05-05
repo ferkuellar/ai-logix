@@ -19,6 +19,21 @@ export async function uploadEvidence(formData) {
   return response.data
 }
 
+export async function processOcr(eventId) {
+  const response = await apiClient.post(`/ocr/process/${eventId}`)
+  return response.data
+}
+
+export async function fetchOcrResult(eventId) {
+  const response = await apiClient.get(`/ocr/result/${eventId}`)
+  return response.data
+}
+
+export async function confirmOcrResult(eventId, payload) {
+  const response = await apiClient.post(`/ocr/confirm/${eventId}`, payload)
+  return response.data
+}
+
 export function buildPublicUrl(path) {
   if (!path) return ''
   if (/^https?:\/\//i.test(path)) return path

@@ -2,13 +2,21 @@ from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile, s
 from sqlalchemy.orm import Session
 from datetime import datetime
 from typing import Optional
+from uuid import UUID
 
 from app.db.session import get_db
 from app.models.delivery_event import DeliveryEvent
 from app.models.order_state import OrderState
 from app.schemas.delivery_event import DeliveryEventCreate, DeliveryEventResponse
 from app.schemas.evidence import EvidenceUploadResponse
+from app.schemas.ocr import (
+    OcrConfirmRequest,
+    OcrConfirmResponse,
+    OcrProcessResponse,
+    OcrResultResponse,
+)
 from app.services.evidence_service import create_photo_uploaded_event, save_evidence_file
+from app.services.ocr_service import confirm_ocr_result, get_ocr_result, process_ocr_for_event
 
 router = APIRouter()
 
@@ -94,4 +102,44 @@ async def upload_evidence(
         "event_id": event.id,
         "photo_url": event.photo_url,
         "metadata": event.payload_json,
+    }
+
+
+@router.post("/ocr/process/{event_id}", response_model=OcrProcessResponse)
+def process_ocr(event_id: UUID, db: Session = Depends(get_db)):
+    event = process_ocr_for_event(db, event_id)
+
+    return {
+        "event_id": event.id,
+        "ocr_text": event.ocr_text or "",
+        "ai_extracted_json": event.ai_extracted_json,
+    }
+
+
+@router.get("/ocr/result/{event_id}", response_model=OcrResultResponse)
+def read_ocr_result(event_id: UUID, db: Session = Depends(get_db)):
+    event = get_ocr_result(db, event_id)
+
+    return {
+        "event_id": event.id,
+        "event_type": event.event_type,
+        "order_number": event.order_number,
+        "photo_url": event.photo_url,
+        "ocr_text": event.ocr_text,
+        "ai_extracted_json": event.ai_extracted_json,
+    }
+
+
+@router.post("/ocr/confirm/{event_id}", response_model=OcrConfirmResponse)
+def confirm_ocr(
+    event_id: UUID,
+    payload: OcrConfirmRequest,
+    db: Session = Depends(get_db),
+):
+    event = confirm_ocr_result(db, event_id, payload.model_dump())
+
+    return {
+        "event_id": event.id,
+        "confirmed": True,
+        "ai_extracted_json": event.ai_extracted_json,
     }

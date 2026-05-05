@@ -1,6 +1,7 @@
 import EvidenceUploadForm from '../components/EvidenceUploadForm'
+import OcrResultPanel from '../components/OcrResultPanel'
 
-export default function Evidence({ onUploadComplete }) {
+export default function Evidence({ lastEvidenceEventId, onUploadComplete }) {
   return (
     <main className="mx-auto flex w-full max-w-7xl flex-1 flex-col gap-5 px-4 py-5 sm:px-6 lg:px-8">
       <div className="flex flex-col gap-2">
@@ -12,6 +13,7 @@ export default function Evidence({ onUploadComplete }) {
       </div>
 
       <EvidenceUploadForm onUploadComplete={onUploadComplete} />
+      <OcrResultPanel key={lastEvidenceEventId || 'empty-ocr'} eventId={lastEvidenceEventId} onConfirmed={onUploadComplete} />
     </main>
   )
 }

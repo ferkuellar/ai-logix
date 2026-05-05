@@ -8,14 +8,12 @@ from sqlalchemy.orm import Session
 
 from app.models.delivery_event import DeliveryEvent
 from app.models.order_state import OrderState
-
-
-ALLOWED_IMAGE_TYPES = {
-    "image/jpeg": ".jpg",
-    "image/png": ".png",
-    "image/webp": ".webp",
-}
-MAX_FILE_SIZE_BYTES = 10 * 1024 * 1024
+from app.services.file_validation import (
+    ALLOWED_IMAGE_TYPES,
+    MAX_FILE_SIZE_BYTES,
+    validate_image_content_type,
+    validate_image_magic_bytes,
+)
 UPLOADS_ROOT = Path(__file__).resolve().parents[2] / "uploads"
 EVIDENCE_DIR = UPLOADS_ROOT / "evidence"
 
@@ -25,19 +23,17 @@ def ensure_evidence_dir() -> None:
 
 
 async def save_evidence_file(file: UploadFile) -> dict:
-    if file.content_type not in ALLOWED_IMAGE_TYPES:
-        raise HTTPException(
-            status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
-            detail="Unsupported file type. Use JPEG, PNG, or WEBP images.",
-        )
+    content_type = validate_image_content_type(file.content_type)
 
     ensure_evidence_dir()
-    extension = ALLOWED_IMAGE_TYPES[file.content_type]
+    extension = ALLOWED_IMAGE_TYPES[content_type]
     stored_filename = f"evidence_{uuid4()}{extension}"
     destination = EVIDENCE_DIR / stored_filename
 
     size_bytes = 0
     try:
+        header_checked = False
+
         with destination.open("wb") as output:
             while chunk := await file.read(1024 * 1024):
                 size_bytes += len(chunk)
@@ -49,7 +45,17 @@ async def save_evidence_file(file: UploadFile) -> dict:
                         detail="File exceeds the 10 MB size limit.",
                     )
 
+                if not header_checked:
+                    validate_image_magic_bytes(chunk[:16], content_type)
+                    header_checked = True
+
                 output.write(chunk)
+
+            if not header_checked:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="Uploaded file is empty.",
+                )
     except HTTPException:
         raise
     except OSError as exc:
@@ -64,7 +70,7 @@ async def save_evidence_file(file: UploadFile) -> dict:
     return {
         "original_filename": file.filename,
         "stored_filename": stored_filename,
-        "content_type": file.content_type,
+        "content_type": content_type,
         "size_bytes": size_bytes,
         "photo_url": f"/uploads/evidence/{stored_filename}",
     }
