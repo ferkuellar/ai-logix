@@ -1,0 +1,30 @@
+services:
+  db:
+    image: postgres:16
+    container_name: ailogix_postgres
+    restart: always
+    environment:
+      POSTGRES_DB: ailogix
+      POSTGRES_USER: ailogix_user
+      POSTGRES_PASSWORD: ailogix_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - ailogix_pgdata:/var/lib/postgresql/data
+
+  backend:
+    build:
+      context: ./backend
+    container_name: ailogix_backend
+    restart: always
+    env_file:
+      - .env
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+    volumes:
+      - ./backend:/app
+
+volumes:
+  ailogix_pgdata:
