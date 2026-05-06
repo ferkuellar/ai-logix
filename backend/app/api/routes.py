@@ -1,12 +1,14 @@
-from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile, status as http_status
+from fastapi import APIRouter, Depends, File, Form, HTTPException, Request, UploadFile, status as http_status
 from sqlalchemy.orm import Session
 from datetime import datetime
 from typing import Optional
 from uuid import UUID
 
+from app.api.dependencies import require_driver_or_above, require_supervisor_or_admin
 from app.db.session import get_db
 from app.models.delivery_event import DeliveryEvent
 from app.models.order_state import OrderState
+from app.models.user import User
 from app.schemas.delivery_event import DeliveryEventCreate, DeliveryEventResponse
 from app.schemas.evidence import EvidenceUploadResponse
 from app.schemas.ocr import (
@@ -17,6 +19,7 @@ from app.schemas.ocr import (
 )
 from app.services.evidence_service import create_photo_uploaded_event, save_evidence_file
 from app.services.ocr_service import confirm_ocr_result, get_ocr_result, process_ocr_for_event
+from app.services.audit_service import log_action
 
 router = APIRouter()
 
@@ -32,7 +35,9 @@ def health_check():
 @router.post("/delivery-events", response_model=DeliveryEventResponse)
 def create_delivery_event(
     payload: DeliveryEventCreate,
-    db: Session = Depends(get_db)
+    request: Request,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_driver_or_above),
 ):
     event = DeliveryEvent(**payload.model_dump())
     db.add(event)
@@ -62,16 +67,30 @@ def create_delivery_event(
 
         db.commit()
 
+    log_action(
+        db,
+        action="DELIVERY_EVENT_CREATED",
+        resource_type="delivery_event",
+        resource_id=str(event.id),
+        user=current_user,
+        metadata={"event_type": event.event_type, "order_number": event.order_number},
+        ip_address=request.client.host if request.client else None,
+    )
+
     return event
 
 
 @router.get("/order-states")
-def list_order_states(db: Session = Depends(get_db)):
+def list_order_states(
+    db: Session = Depends(get_db),
+    _: User = Depends(require_supervisor_or_admin),
+):
     return db.query(OrderState).all()
 
 
 @router.post("/evidence/upload", response_model=EvidenceUploadResponse)
 async def upload_evidence(
+    request: Request,
     order_number: str = Form(...),
     status: Optional[str] = Form(None),
     latitude: Optional[float] = Form(None),
@@ -79,6 +98,7 @@ async def upload_evidence(
     observations: Optional[str] = Form(None),
     file: UploadFile = File(...),
     db: Session = Depends(get_db),
+    current_user: User = Depends(require_driver_or_above),
 ):
     order_number = order_number.strip()
     if not order_number:
@@ -97,6 +117,15 @@ async def upload_evidence(
         observations=observations,
         file_metadata=file_metadata,
     )
+    log_action(
+        db,
+        action="EVIDENCE_UPLOADED",
+        resource_type="delivery_event",
+        resource_id=str(event.id),
+        user=current_user,
+        metadata={"order_number": event.order_number, "photo_url": event.photo_url},
+        ip_address=request.client.host if request.client else None,
+    )
 
     return {
         "event_id": event.id,
@@ -106,8 +135,22 @@ async def upload_evidence(
 
 
 @router.post("/ocr/process/{event_id}", response_model=OcrProcessResponse)
-def process_ocr(event_id: UUID, db: Session = Depends(get_db)):
+def process_ocr(
+    event_id: UUID,
+    request: Request,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_supervisor_or_admin),
+):
     event = process_ocr_for_event(db, event_id)
+    log_action(
+        db,
+        action="OCR_PROCESSED",
+        resource_type="delivery_event",
+        resource_id=str(event.id),
+        user=current_user,
+        metadata={"order_number": event.order_number},
+        ip_address=request.client.host if request.client else None,
+    )
 
     return {
         "event_id": event.id,
@@ -117,7 +160,11 @@ def process_ocr(event_id: UUID, db: Session = Depends(get_db)):
 
 
 @router.get("/ocr/result/{event_id}", response_model=OcrResultResponse)
-def read_ocr_result(event_id: UUID, db: Session = Depends(get_db)):
+def read_ocr_result(
+    event_id: UUID,
+    db: Session = Depends(get_db),
+    _: User = Depends(require_supervisor_or_admin),
+):
     event = get_ocr_result(db, event_id)
 
     return {
@@ -135,6 +182,7 @@ def confirm_ocr(
     event_id: UUID,
     payload: OcrConfirmRequest,
     db: Session = Depends(get_db),
+    _: User = Depends(require_supervisor_or_admin),
 ):
     event = confirm_ocr_result(db, event_id, payload.model_dump())
 
