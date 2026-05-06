@@ -1,10 +1,12 @@
 import { useEffect, useState } from 'react'
 import Dashboard from './pages/Dashboard'
 import Evidence from './pages/Evidence'
+import HumanReview from './pages/HumanReview'
 
 const routes = {
   dashboard: '/',
   evidence: '/evidence',
+  review: '/review',
 }
 
 function App() {
@@ -33,7 +35,8 @@ function App() {
     setRefreshKey((current) => current + 1)
   }
 
-  const currentPath = path === routes.evidence ? routes.evidence : routes.dashboard
+  const knownPaths = Object.values(routes)
+  const currentPath = knownPaths.includes(path) ? path : routes.dashboard
 
   return (
     <div className="min-h-screen bg-slate-100">
@@ -63,10 +66,19 @@ function App() {
             >
               Evidencia
             </button>
+            <button
+              className={`rounded-lg px-3 py-2 text-sm font-semibold ${currentPath === routes.review ? 'bg-ink text-white' : 'bg-slate-100 text-slate-700'}`}
+              onClick={() => navigate(routes.review)}
+              type="button"
+            >
+              Revision
+            </button>
           </nav>
         </div>
       </header>
-      {currentPath === routes.evidence ? (
+      {currentPath === routes.review ? (
+        <HumanReview onReviewComplete={() => setRefreshKey((current) => current + 1)} />
+      ) : currentPath === routes.evidence ? (
         <Evidence lastEvidenceEventId={lastEvidenceEventId} onUploadComplete={handleUploadComplete} />
       ) : (
         <Dashboard refreshKey={refreshKey} />

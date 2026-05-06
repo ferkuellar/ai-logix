@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
 from app.api.routes import router
+from app.api.review_routes import router as review_router
 from app.core.config import settings
 from app.db.base import Base
 from app.db.session import engine
@@ -37,3 +38,4 @@ app.add_middleware(
 app.mount("/uploads", StaticFiles(directory=UPLOADS_ROOT), name="uploads")
 
 app.include_router(router, prefix="/api")
+app.include_router(review_router, prefix="/api")

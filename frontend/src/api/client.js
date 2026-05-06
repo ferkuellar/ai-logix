@@ -34,6 +34,26 @@ export async function confirmOcrResult(eventId, payload) {
   return response.data
 }
 
+export async function fetchPendingReviews(params = {}) {
+  const response = await apiClient.get('/review/pending', { params })
+  return Array.isArray(response.data) ? response.data : []
+}
+
+export async function fetchReviewDetail(eventId) {
+  const response = await apiClient.get(`/review/${eventId}`)
+  return response.data
+}
+
+export async function confirmHumanReview(eventId, payload) {
+  const response = await apiClient.post(`/review/${eventId}/confirm`, payload)
+  return response.data
+}
+
+export async function rejectHumanReview(eventId, payload) {
+  const response = await apiClient.post(`/review/${eventId}/reject`, payload)
+  return response.data
+}
+
 export function buildPublicUrl(path) {
   if (!path) return ''
   if (/^https?:\/\//i.test(path)) return path

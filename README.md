@@ -8,11 +8,14 @@ Fase 3 agrega subida local de evidencia fotografica y eventos `PHOTO_UPLOADED`.
 
 Fase 4 agrega OCR/IA desacoplado para procesar evidencia, con mock provider local y provider OpenAI preparado.
 
+Fase 5 agrega revision humana del OCR para confirmar o rechazar datos antes de actualizar el estado operativo confiable.
+
 Documentacion:
 
 - [docs/fase-2-frontend-map.md](docs/fase-2-frontend-map.md)
 - [docs/fase-3-subida-fotos.md](docs/fase-3-subida-fotos.md)
 - [docs/fase-4-ocr-ia.md](docs/fase-4-ocr-ia.md)
+- [docs/fase-5-confirmacion-humana.md](docs/fase-5-confirmacion-humana.md)
 
 ## Ejecucion
 

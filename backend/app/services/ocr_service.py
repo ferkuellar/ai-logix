@@ -12,6 +12,12 @@ from app.services.file_validation import validate_local_image_file
 from app.services.ocr_providers import MockOcrProvider, OpenAiOcrProvider, OcrProvider
 
 
+REVIEW_STATUS_PENDING = "OCR_PENDING"
+REVIEW_STATUS_PROCESSED = "OCR_PROCESSED"
+REVIEW_STATUS_REQUIRED = "HUMAN_REVIEW_REQUIRED"
+REVIEW_STATUS_CONFIRMED = "HUMAN_CONFIRMED"
+
+
 def get_ocr_provider() -> OcrProvider:
     provider_name = settings.ocr_provider.lower()
 
@@ -107,6 +113,7 @@ def process_ocr_for_event(db: Session, event_id: UUID) -> DeliveryEvent:
     event.ai_extracted_json = {
         **extracted_data,
         "ocr_status": "processed",
+        "review_status": REVIEW_STATUS_REQUIRED,
         "provider": settings.ocr_provider.lower(),
     }
 
@@ -170,6 +177,7 @@ def confirm_ocr_result(db: Session, event_id: UUID, confirmation: dict) -> Deliv
         "observations": confirmation.get("observations"),
         "confirmed": True,
         "ocr_status": "confirmed",
+        "review_status": REVIEW_STATUS_CONFIRMED,
     }
 
     event.order_number = order_number
