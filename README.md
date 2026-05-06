@@ -10,12 +10,15 @@ Fase 4 agrega OCR/IA desacoplado para procesar evidencia, con mock provider loca
 
 Fase 5 agrega revision humana del OCR para confirmar o rechazar datos antes de actualizar el estado operativo confiable.
 
+Fase 6 agrega autenticacion JWT, roles `ADMIN`/`SUPERVISOR`/`DRIVER`, proteccion de endpoints operativos y auditoria minima.
+
 Documentacion:
 
 - [docs/fase-2-frontend-map.md](docs/fase-2-frontend-map.md)
 - [docs/fase-3-subida-fotos.md](docs/fase-3-subida-fotos.md)
 - [docs/fase-4-ocr-ia.md](docs/fase-4-ocr-ia.md)
 - [docs/fase-5-confirmacion-humana.md](docs/fase-5-confirmacion-humana.md)
+- [docs/fase-6-auth-roles-permisos.md](docs/fase-6-auth-roles-permisos.md)
 
 ## Ejecucion
 
@@ -25,3 +28,14 @@ docker compose up --build
 
 - Backend: `http://localhost:8000`
 - Frontend: `http://localhost:5173`
+
+## Seed admin
+
+```bash
+docker compose exec backend python -m app.scripts.seed_admin
+```
+
+Login desarrollo:
+
+- Email: `admin@ailogix.local`
+- Password: `ChangeMe123!`

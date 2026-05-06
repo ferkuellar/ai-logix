@@ -9,6 +9,44 @@ export const apiClient = axios.create({
   timeout: 10000,
 })
 
+apiClient.interceptors.request.use((config) => {
+  const token = window.localStorage.getItem('ailogix_token')
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`
+  }
+  return config
+})
+
+apiClient.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      window.dispatchEvent(new Event('ailogix:unauthorized'))
+    }
+    return Promise.reject(error)
+  },
+)
+
+export async function loginRequest(credentials) {
+  const response = await apiClient.post('/auth/login', credentials)
+  return response.data
+}
+
+export async function fetchCurrentUser() {
+  const response = await apiClient.get('/auth/me')
+  return response.data
+}
+
+export async function fetchUsers() {
+  const response = await apiClient.get('/users')
+  return Array.isArray(response.data) ? response.data : []
+}
+
+export async function createUser(payload) {
+  const response = await apiClient.post('/users', payload)
+  return response.data
+}
+
 export async function fetchOrderStates() {
   const response = await apiClient.get('/order-states')
   return Array.isArray(response.data) ? response.data : []
