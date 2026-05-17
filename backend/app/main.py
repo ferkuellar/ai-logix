@@ -19,7 +19,8 @@ from app.models.user import User
 from app.models.audit_log import AuditLog
 
 
-Base.metadata.create_all(bind=engine)
+if settings.app_env.lower() == "development":
+    Base.metadata.create_all(bind=engine)
 ensure_evidence_dir()
 
 app = FastAPI(

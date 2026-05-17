@@ -19,6 +19,12 @@ Durable decisions are recorded here so future builders do not rely on chat histo
 | 2026-05-17 | Keep local Docker Compose defaults but label them development-only. | Local onboarding should continue to work without real secrets. | Developers can run locally; shared environments must override values. |
 | 2026-05-17 | Defer full rate limiting and account lockout. | Fase 1 is limited to configuration and secret hardening. | Risk remains documented for a future security sprint. |
 | 2026-05-17 | Remove prefilled demo password from login UI. | A password default in the browser UI exposes a credential pattern and is unnecessary for secure operation. | Login flow remains unchanged, but users must type the password. |
+| 2026-05-17 | Alembic is the official migration tool. | Formal migrations reduce schema drift and make database evolution auditable. | Future schema changes must use Alembic revisions. |
+| 2026-05-17 | Migration files must be manually reviewed before applying. | Alembic autogenerate can miss intent or produce destructive changes. | Builders must inspect upgrade/downgrade operations before applying migrations. |
+| 2026-05-17 | Application must not depend on `Base.metadata.create_all` outside development. | Non-local schema changes should be explicit migrations. | `create_all` remains only as temporary local development compatibility. |
+| 2026-05-17 | Applied migrations must not be edited. | Editing applied revisions breaks migration history in shared environments. | Create a new revision for fixes after a migration is shared/applied. |
+| 2026-05-17 | Production requires backup before destructive migrations. | Destructive schema changes can cause irreversible data loss. | Migration runbooks must include backup/restore checks before production changes. |
+| 2026-05-17 | `User` to `Driver` relationship remains deferred. | The business assignment model is not defined yet. | Evaluate in a future data model or workflow phase without inventing rules in Fase 2. |
 
 ## Decision Maintenance
 

@@ -58,6 +58,16 @@ Measures engineering health:
 - Migration status.
 - Documentation completeness.
 
+### Database
+
+Measures schema governance:
+
+- Alembic baseline exists.
+- Migration history is readable.
+- Database revision is at migration head.
+- Automatic `create_all` is restricted outside development.
+- Data model documentation covers current entities and known gaps.
+
 ## Red / Yellow / Green Interpretation
 
 | Color | Meaning | Action |
@@ -91,6 +101,12 @@ Measures engineering health:
 - `cors_wildcard_blocked`
 - `config_security_tests_passed`
 - `migration_status`
+- `migration_head_current`
+- `schema_baseline_created`
+- `alembic_history_available`
+- `create_all_restricted`
+- `data_model_documentation_completeness`
+- `referential_integrity_gap_count`
 - `human_review_sla_minutes`
 - `ocr_failed_count`
 - Evidence retention/storage usage metric.

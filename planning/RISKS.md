@@ -2,7 +2,7 @@
 
 | Risk | Likelihood | Impact | Severity | Mitigation | Owner | Status |
 | --- | --- | --- | --- | --- | --- | --- |
-| Falta de migraciones formales o migraciones por validar. | High | Schema changes can become unsafe or inconsistent. | High | Add Alembic or equivalent migration workflow in Phase 1/2 before production. | Engineering | Open |
+| Migracion baseline puede diferir de una DB existente creada con `create_all`. | Medium | Alembic may see objects already present and require stamping instead of applying baseline. | High | For existing DBs, inspect schema and use `alembic stamp head` only after confirming it matches baseline. | Engineering/DevOps | Open |
 | Secretos default en desarrollo. | Medium | Defaults can be copied into staging/production. | High | Runtime settings now block unsafe defaults outside development; keep `.env` out of Git and rotate all secrets before non-local environments. | Engineering/Security | Mitigated |
 | Posible exposicion de `/uploads`. | Medium | Evidence photos may be accessible without adequate production controls. | High | Define evidence access model, avoid public serving in production, add authorization gate before production. | Security/Engineering | Open |
 | `DRIVER` user has no strong enforced relationship with `Driver` domain record. | Medium | A driver user could submit events not tied to an assigned driver identity. | Medium | Define user-driver relationship and assignment rules in a future sprint. | Product/Engineering | Open |
@@ -18,6 +18,10 @@
 | Secret scanning is not automated in CI/CD. | Medium | Secrets may be committed if local review fails. | High | Add secret scan to CI and optionally pre-commit in a future phase. | Security/DevOps | Open |
 | Full runtime stack was not rebuilt during Fase 1. | Low | Runtime integration issues may remain until demo/next implementation validation. | Medium | `docker compose config` and config tests passed; run `docker compose up --build` before demo or Fase 2 closure. | Engineering | Open |
 | Pydantic class-based `Config` deprecation warnings. | Medium | Future Pydantic major version may require config migration. | Low | Migrate settings/schemas to `ConfigDict` in a future maintenance sprint. | Engineering | Open |
+| Flexible JSON fields can make validation and reporting harder. | High | OCR/review payloads may drift by provider or workflow. | Medium | Keep current JSON fields but document expected shapes before analytics/reporting hardening. | Engineering/Product | Open |
+| Downgrade support can be limited for future data-changing migrations. | Medium | Rollback may not restore transformed/deleted data. | High | Require backup and explicit rollback notes before destructive migrations. | DevOps/Engineering | Open |
+| Migrations are not automated in CI/CD. | High | Migration drift may be missed before merge/deploy. | High | Add CI checks in a future phase for migration history and tests. | DevOps | Open |
+| Backup/restore is not implemented. | Medium | Production migration rollback may be unsafe. | High | Define backup/restore before production migrations. | DevOps/Ops | Open |
 
 ## Review Cadence
 

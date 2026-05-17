@@ -1,14 +1,27 @@
 # Data Model
 
-This document describes entities verified from current SQLAlchemy models. It does not invent fields beyond those detected in code.
+This document describes entities verified from current SQLAlchemy models. It does not invent relationships or fields that are not implemented.
+
+## Migration Status
+
+Alembic baseline migration exists at:
+
+```text
+backend/alembic/versions/20260517_0001_baseline_schema.py
+```
+
+The baseline represents the current SQLAlchemy model schema.
 
 ## User
 
+Entity: `User`
+
 Purpose: Application user for authentication and role-based authorization.
 
-Main fields:
+Primary key: `id`
 
-- `id`
+Important fields:
+
 - `email`
 - `full_name`
 - `hashed_password`
@@ -17,26 +30,34 @@ Main fields:
 - `created_at`
 - `updated_at`
 
-Known relationships:
+Relationships:
 
-- `audit_logs.user_id` can reference `users.id`.
+- `audit_logs.user_id` references `users.id`.
 
-Missing relationships:
+Indexes / uniqueness:
 
-- No verified strong one-to-one relationship between `users` with role `DRIVER` and `drivers`.
+- `email` is unique and indexed.
 
 Risks:
 
-- Driver users may not be strongly tied to driver operational records.
-- Role is a string and should be constrained before production.
+- Role is stored as a string without database enum/check constraint.
+- No formal relationship exists between `users` and `drivers`.
+
+Future improvements:
+
+- Evaluate `User` to `Driver` relationship.
+- Add role constraints or enum strategy.
 
 ## Driver
 
+Entity: `Driver`
+
 Purpose: Operational driver profile.
 
-Main fields:
+Primary key: `id`
 
-- `id`
+Important fields:
+
 - `name`
 - `phone`
 - `email`
@@ -44,25 +65,33 @@ Main fields:
 - `status`
 - `created_at`
 
-Known relationships:
+Relationships:
 
 - `delivery_events.driver_id` references `drivers.id`.
 
-Missing relationships:
+Indexes / uniqueness:
 
-- No verified foreign key from `users` to `drivers`.
+- `phone` is unique.
 
 Risks:
 
-- Assignment and identity model need business definition.
+- No enforced link from `users.role = DRIVER` to `drivers`.
+- Driver assignment rules are not formalized.
+
+Future improvements:
+
+- Define identity and assignment model for drivers.
 
 ## Store
 
+Entity: `Store`
+
 Purpose: Store or delivery destination record.
 
-Main fields:
+Primary key: `id`
 
-- `id`
+Important fields:
+
 - `store_code`
 - `store_name`
 - `address`
@@ -73,25 +102,33 @@ Main fields:
 - `zone`
 - `created_at`
 
-Known relationships:
+Relationships:
 
 - `delivery_events.store_id` references `stores.id`.
 
-Missing relationships:
+Indexes / uniqueness:
 
-- No verified route, customer, or account model.
+- `store_code` is unique.
 
 Risks:
 
-- Store data quality affects maps and reporting.
+- No formal customer/account relationship exists.
+- Store data quality affects map and reporting accuracy.
+
+Future improvements:
+
+- Add import/validation process for store master data.
 
 ## DeliveryEvent
 
-Purpose: Operational event, evidence record, OCR record, and review-related data container.
+Entity: `DeliveryEvent`
 
-Main fields:
+Purpose: Operational event, evidence record, OCR result container, and review-related JSON holder.
 
-- `id`
+Primary key: `id`
+
+Important fields:
+
 - `event_type`
 - `order_number`
 - `driver_id`
@@ -106,28 +143,37 @@ Main fields:
 - `payload_json`
 - `created_at`
 
-Known relationships:
+Relationships:
 
-- Optional `driver_id` foreign key to `drivers.id`.
-- Optional `store_id` foreign key to `stores.id`.
+- `driver_id` references `drivers.id`.
+- `store_id` references `stores.id`.
 
-Missing relationships:
+Indexes / uniqueness:
 
-- No verified order table exists; `order_number` is a string.
-- Review state appears represented in JSON/service behavior, not a dedicated table.
+- No model-defined index detected for `order_number`.
 
 Risks:
 
-- JSON fields can complicate reporting.
-- Status strings need canonical values.
+- `order_number` is a string without a formal `orders` table.
+- JSON fields support flexible iteration but can weaken validation/reporting.
+- Status values are not constrained by catalog.
+
+Future improvements:
+
+- Define official order/status model.
+- Add indexes after query patterns are confirmed.
+- Consider typed review/OCR state tables if reporting grows.
 
 ## OrderState
 
+Entity: `OrderState`
+
 Purpose: Latest trusted operational state for an order.
 
-Main fields:
+Primary key: `id`
 
-- `id`
+Important fields:
+
 - `order_number`
 - `current_status`
 - `store_id`
@@ -137,26 +183,35 @@ Main fields:
 - `last_longitude`
 - `last_update_at`
 
-Known relationships:
+Relationships:
+
+- No explicit foreign keys are defined for `store_id`, `driver_id`, or `last_event_id`.
+- `order_number` links conceptually to delivery events by string value.
+
+Indexes / uniqueness:
 
 - `order_number` is unique.
 
-Missing relationships:
-
-- `store_id`, `driver_id`, and `last_event_id` are UUID fields but not verified as explicit foreign keys in the model.
-
 Risks:
 
-- Referential integrity may not be enforced for latest-state references.
-- Current status values are not constrained.
+- Referential integrity is not enforced for latest-state references.
+- Missing order status catalog can cause inconsistent reporting.
+
+Future improvements:
+
+- Evaluate explicit foreign keys after business rules are confirmed.
+- Add canonical order status taxonomy.
 
 ## AuditLog
 
+Entity: `AuditLog`
+
 Purpose: Minimal security and operational audit trail.
 
-Main fields:
+Primary key: `id`
 
-- `id`
+Important fields:
+
 - `user_id`
 - `action`
 - `resource_type`
@@ -165,15 +220,31 @@ Main fields:
 - `ip_address`
 - `created_at`
 
-Known relationships:
+Relationships:
 
-- Optional `user_id` foreign key to `users.id`.
+- `user_id` references `users.id`.
 
-Missing relationships:
+Indexes / uniqueness:
 
-- No dedicated audit retention policy.
+- No model-defined index detected.
 
 Risks:
 
-- Critical action coverage is partial.
-- Audit detail may be insufficient for production compliance.
+- Audit coverage is minimal.
+- Retention policy is not defined.
+- JSON metadata can vary by action.
+
+Future improvements:
+
+- Define critical action coverage.
+- Add retention policy.
+- Add indexes for audit reporting if needed.
+
+## Known Data Model Gaps
+
+- Missing formal `User` to `Driver` relationship.
+- Missing formal `orders` table.
+- Missing canonical order status catalog.
+- Flexible JSON fields require reporting discipline.
+- Evidence retention policy is undefined.
+- `OrderState` latest references are not enforced as foreign keys.

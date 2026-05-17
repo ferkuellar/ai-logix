@@ -17,3 +17,6 @@
 | Que acciones adicionales deben auditarse? | Security/Product | Phase 1 | Open | Current audit coverage is minimal but useful. |
 | Que herramienta de secret scanning debe usarse en CI/CD? | Security/DevOps | Phase 2 | Open | Candidate tools include Gitleaks or equivalent. |
 | Debe existir un proceso para deshabilitar seed admin fuera de development? | Security/Ops | Before staging | Open | Fase 1 blocks weak seed password but does not remove seed flow. |
+| Existing databases creadas con `create_all` deben ser stamped o recreadas localmente? | Engineering/DevOps | Before shared DB migration | Open | Decide per environment after schema comparison. |
+| Que indices se necesitan para consultas frecuentes de `delivery_events` y `audit_logs`? | Engineering/Ops | Before performance hardening | Open | Baseline preserves current model; query-driven indexes come later. |
+| Cuando se formalizara una tabla `orders`? | Product/Engineering | Future data model phase | Open | Current system uses `order_number` string. |

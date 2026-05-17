@@ -17,6 +17,7 @@ Documentacion:
 - [docs/SECURITY.md](docs/SECURITY.md)
 - [docs/OPERATIONS.md](docs/OPERATIONS.md)
 - [docs/VALIDATION.md](docs/VALIDATION.md)
+- [docs/DATABASE_MIGRATIONS.md](docs/DATABASE_MIGRATIONS.md)
 - [docs/fase-2-frontend-map.md](docs/fase-2-frontend-map.md)
 - [docs/fase-3-subida-fotos.md](docs/fase-3-subida-fotos.md)
 - [docs/fase-4-ocr-ia.md](docs/fase-4-ocr-ia.md)
@@ -53,3 +54,13 @@ Login desarrollo:
 
 - Email: `admin@ailogix.local`
 - Password: `ChangeMe123!`
+
+## Migraciones
+
+Alembic vive en `backend/`.
+
+```bash
+docker compose exec backend alembic -c alembic.ini current
+docker compose exec backend alembic -c alembic.ini history
+docker compose exec backend alembic -c alembic.ini upgrade head
+```
