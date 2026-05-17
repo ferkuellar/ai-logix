@@ -127,6 +127,34 @@ Next action: run `npm install` in a clean environment or CI.
 | `python -m pytest backend/tests` first Fase 3 run | Failed, 48 passed/1 failed | Assertion expected `provider` in response model. | `OcrProcessResponse` strips extra response fields not defined in schema. | Test assertion was too specific for current API contract. | Asserted stable response field `ocr_text`; suite passed. |
 | `npm run test` first Fase 3 runs | Failed | Missing cleanup between tests and duplicate text matches. | Testing Library cleanup was not configured for Vitest. | DOM leaked between tests. | Added cleanup in `frontend/src/test/setup.js`; tests passed. |
 
+## Fase 4 Validation Results
+
+| Command / Method | Expected Result | Actual Result | Status | Notes |
+| --- | --- | --- | --- | --- |
+| Precheck Fase 0/Fase 1/Fase 2/Fase 3 | Required prior files exist. | All required files exist; no nested `ai-logix/ai-logix`. | Passed | Fase 4 proceeded. |
+| User-Driver assignment tests | DRIVER users require valid `driver_id`. | Covered by backend tests. | Passed | `ADMIN` cannot create DRIVER without/unknown `driver_id`. |
+| Driver ownership tests | DRIVER cannot operate another `driver_id`. | Covered by backend tests. | Passed | Delivery events and evidence upload enforce ownership. |
+| Admin/Supervisor regression | Elevated roles can operate for valid drivers. | Covered by backend tests. | Passed | ADMIN/SUPERVISOR event and evidence tests pass. |
+| Backend local tests | `python -m pytest backend/tests` exits 0. | 66 passed, 316 warnings. | Passed | Warning noise remains documented. |
+| Docker Compose config | `docker compose config` exits 0. | Compose rendered successfully. | Passed | Development defaults remain visible. |
+| Alembic history | `docker compose exec backend alembic -c alembic.ini history` exits 0. | Baseline and `20260517_0002` history displayed. | Passed | Migration chain is readable in container. |
+| Alembic current before adoption | `docker compose exec backend alembic -c alembic.ini current` reports revision. | No current revision displayed. | Passed with note | Local DB existed before Alembic and had no `alembic_version` row. |
+| Alembic upgrade before adoption | `docker compose exec backend alembic -c alembic.ini upgrade head` applies all revisions. | Failed on duplicate `drivers` table. | Documented | Expected for local DB previously created by development `create_all`. |
+| Alembic baseline adoption | `docker compose exec backend alembic -c alembic.ini stamp 20260517_0001` exits 0. | Baseline stamped in local development DB. | Passed | Used only because baseline tables already existed locally. |
+| Alembic Fase 4 upgrade | `docker compose exec backend alembic -c alembic.ini upgrade head` exits 0. | Upgraded `20260517_0001 -> 20260517_0002`. | Passed | Applied `users.driver_id` migration. |
+| Alembic current after upgrade | `docker compose exec backend alembic -c alembic.ini current` reports head. | `20260517_0002 (head)`. | Passed | Local DB is now on Fase 4 head. |
+| Backend Docker tests | `docker compose exec backend python -m pytest` exits 0. | 66 passed, 240 warnings. | Passed | Canonical backend validation command. |
+| Frontend tests | `npm run test` exits 0. | 3 files passed, 9 tests passed. | Passed | Includes DRIVER dashboard block regression. |
+| Frontend build | `npm run build` exits 0. | Vite build succeeded. | Passed | Bundle generated under `frontend/dist`. |
+| Frontend lint | `npm run lint` exits 0. | ESLint succeeded. | Passed | No lint errors. |
+
+## Fase 4 Failures And Corrections
+
+| Command | Result | Error | Probable Cause | Impact | Next Action |
+| --- | --- | --- | --- | --- | --- |
+| First Fase 4 backend test run | Failed, 62 passed, 2 failed, 2 errors | Missing `User` import in fixture and UUID string used in SQLAlchemy UUID filter. | New tests inserted unassigned driver directly and queried by response string ID. | Ownership implementation was sound, tests needed correction. | Imported `User` and converted event IDs to `UUID`; local backend suite passed. |
+| First Fase 4 Alembic upgrade on local DB | Failed | `psycopg2.errors.DuplicateTable: relation "drivers" already exists` | The local development DB had baseline tables created before Alembic. | Alembic could not replay the baseline create-table migration against existing tables. | Stamped baseline `20260517_0001`, then applied `20260517_0002`; DB now reports head. |
+
 ## Commands Not Executed
 
 ### `docker compose up --build`

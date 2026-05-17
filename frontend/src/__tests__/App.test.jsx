@@ -44,7 +44,7 @@ describe('App', () => {
     window.localStorage.setItem('ailogix_token', 'test-token')
     window.localStorage.setItem(
       'ailogix_user',
-      JSON.stringify({ email: 'admin@example.com', full_name: 'Admin User', role: 'ADMIN' }),
+      JSON.stringify({ email: 'admin@example.com', full_name: 'Admin User', role: 'ADMIN', driver_id: null }),
     )
     fetchOrderStates.mockResolvedValue([
       {
@@ -68,7 +68,7 @@ describe('App', () => {
     window.localStorage.setItem('ailogix_token', 'test-token')
     window.localStorage.setItem(
       'ailogix_user',
-      JSON.stringify({ email: 'admin@example.com', full_name: 'Admin User', role: 'ADMIN' }),
+      JSON.stringify({ email: 'admin@example.com', full_name: 'Admin User', role: 'ADMIN', driver_id: null }),
     )
     fetchOrderStates.mockResolvedValue([])
 
@@ -77,5 +77,23 @@ describe('App', () => {
 
     await waitFor(() => expect(window.localStorage.getItem('ailogix_token')).toBeNull())
     expect(screen.getByRole('heading', { name: /ingresar a ai logix/i })).toBeInTheDocument()
+  })
+
+  it('blocks global dashboard shell for authenticated driver users', () => {
+    window.localStorage.setItem('ailogix_token', 'driver-token')
+    window.localStorage.setItem(
+      'ailogix_user',
+      JSON.stringify({
+        email: 'driver@example.com',
+        full_name: 'Driver User',
+        role: 'DRIVER',
+        driver_id: '11111111-1111-1111-1111-111111111111',
+      }),
+    )
+
+    renderApp()
+
+    expect(screen.getByRole('heading', { name: /acceso no autorizado/i })).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /dashboard/i })).not.toBeInTheDocument()
   })
 })

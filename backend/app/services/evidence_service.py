@@ -1,7 +1,7 @@
 from datetime import datetime
 from pathlib import Path
 from typing import Optional
-from uuid import uuid4
+from uuid import UUID, uuid4
 
 from fastapi import HTTPException, UploadFile, status
 from sqlalchemy.orm import Session
@@ -81,6 +81,7 @@ def create_photo_uploaded_event(
     *,
     order_number: str,
     file_metadata: dict,
+    driver_id: Optional[UUID] = None,
     status_value: Optional[str] = None,
     latitude: Optional[float] = None,
     longitude: Optional[float] = None,
@@ -89,6 +90,7 @@ def create_photo_uploaded_event(
     event = DeliveryEvent(
         event_type="PHOTO_UPLOADED",
         order_number=order_number,
+        driver_id=driver_id,
         status=status_value,
         latitude=latitude,
         longitude=longitude,
@@ -119,6 +121,7 @@ def create_photo_uploaded_event(
         order_state.current_status = status_value
 
     order_state.last_event_id = event.id
+    order_state.driver_id = driver_id
     if latitude is not None:
         order_state.last_latitude = latitude
     if longitude is not None:

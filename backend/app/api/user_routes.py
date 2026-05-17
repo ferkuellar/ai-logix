@@ -8,7 +8,7 @@ from app.db.session import get_db
 from app.models.user import User
 from app.schemas.user import UserCreate, UserResponse, UserUpdate
 from app.services.audit_service import log_action
-from app.services.auth_service import create_user
+from app.services.auth_service import create_user, validate_driver_assignment
 
 router = APIRouter(prefix="/users", tags=["users"])
 
@@ -34,6 +34,7 @@ def create_user_endpoint(
         full_name=payload.full_name,
         password=payload.password,
         role=payload.role,
+        driver_id=payload.driver_id,
     )
     log_action(
         db,
@@ -74,6 +75,10 @@ def update_user(
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User was not found.")
 
     updates = payload.model_dump(exclude_unset=True)
+    next_role = updates.get("role", user.role)
+    next_driver_id = updates.get("driver_id", user.driver_id)
+    validate_driver_assignment(db, role=next_role, driver_id=next_driver_id)
+
     for key, value in updates.items():
         setattr(user, key, value)
 

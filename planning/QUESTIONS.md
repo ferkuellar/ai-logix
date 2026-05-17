@@ -24,3 +24,6 @@
 | En que fase se agrega CI/CD para ejecutar backend/frontend tests? | DevOps/Engineering | Before production hardening | Open | Fase 3 documents commands but does not automate them. |
 | Debe auditarse `OCR_CONFIRMED` como accion critica separada? | Security/Product | Before audit hardening | Open | Fase 3 covers implemented audit actions and documents this gap. |
 | Se requiere prueba E2E browser para dashboard/mapa antes de demo? | Product/Engineering | Before client/demo readiness | Open | Frontend tests mock Leaflet and API. |
+| Como se backfillan usuarios DRIVER existentes sin `driver_id`? | Ops/Engineering | Before staging data migration | Open | Fase 4 blocks unassigned DRIVER users operationally. |
+| Debe existir una tabla formal de asignacion orden-driver? | Product/Engineering | Before advanced driver workflow | Open | Fase 4 enforces by `driver_id`, not by order assignment. |
+| Que endpoint scoped necesita el DRIVER para su vista operativa? | Product/Frontend | Driver UX phase | Open | Global `/api/order-states` remains blocked for DRIVER. |

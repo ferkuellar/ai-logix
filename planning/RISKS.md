@@ -5,7 +5,7 @@
 | Migracion baseline puede diferir de una DB existente creada con `create_all`. | Medium | Alembic may see objects already present and require stamping instead of applying baseline. | High | For existing DBs, inspect schema and use `alembic stamp head` only after confirming it matches baseline. | Engineering/DevOps | Open |
 | Secretos default en desarrollo. | Medium | Defaults can be copied into staging/production. | High | Runtime settings now block unsafe defaults outside development; keep `.env` out of Git and rotate all secrets before non-local environments. | Engineering/Security | Mitigated |
 | Posible exposicion de `/uploads`. | Medium | Evidence photos may be accessible without adequate production controls. | High | Define evidence access model, avoid public serving in production, add authorization gate before production. | Security/Engineering | Open |
-| `DRIVER` user has no strong enforced relationship with `Driver` domain record. | Medium | A driver user could submit events not tied to an assigned driver identity. | Medium | Define user-driver relationship and assignment rules in a future sprint. | Product/Engineering | Open |
+| Existing `DRIVER` users may not have `driver_id`. | Medium | Existing driver accounts can be blocked from operational actions after Fase 4. | Medium | Assign valid `driver_id` before using DRIVER accounts in shared environments. | Ops/Engineering | Open |
 | Login sin rate limit. | Medium | Brute-force attempts can target credentials. | High | Add rate limiting and lockout/monitoring strategy in a future security phase. | Security | Open |
 | OCR can fail or return low-confidence output. | High | Review queue may receive incomplete or wrong data. | Medium | Keep human review mandatory; track OCR failure and confidence metrics. | Engineering/Ops | Open |
 | Evidence files can grow without retention policy. | High | Disk usage, privacy, and operational cost risk. | High | Define retention, archival, and deletion policy before production. | Ops/Security | Open |
@@ -28,6 +28,11 @@
 | Warning noise remains high. | High | Real warnings can be missed among deprecation noise. | Medium | Migrate Pydantic Config and UTC timestamp usage in a maintenance sprint. | Engineering | Open |
 | OCR confirm action lacks explicit AuditLog coverage. | Medium | Some OCR confirmation decisions may be harder to trace. | Medium | Decide whether `OCR_CONFIRMED` should be logged in a future audit hardening phase. | Security/Engineering | Open |
 | CI/CD does not run the new suite automatically. | High | Regressions can still merge if commands are skipped manually. | High | Add GitHub Actions or equivalent in a future CI/CD phase. | DevOps | Open |
+| Historical delivery events may have `driver_id` null. | High | Old events may not map to a driver user for ownership reporting. | Medium | Preserve historical data and backfill only after business review. | Product/Engineering | Open |
+| Orders do not have formal driver assignment. | High | Driver ownership is enforced by event/evidence `driver_id`, not by an order assignment table. | High | Define order assignment model in a future workflow/data phase. | Product/Engineering | Open |
+| No dedicated DRIVER order-state endpoint exists. | Medium | Driver UI cannot yet show scoped order state from backend endpoint. | Medium | Add scoped driver endpoint when driver workflow UX is implemented. | Product/Engineering | Open |
+| Fase 4 ownership is driver-based, not route-based. | Medium | Route or stop-level authorization remains undefined. | Medium | Add route/manifest rules after operations defines assignment model. | Product/Ops | Open |
+| Mobile-first DRIVER experience is still missing. | High | Driver workflow remains limited for field use. | Medium | Plan a later mobile-first driver phase. | Product/Frontend | Open |
 
 ## Review Cadence
 

@@ -52,3 +52,31 @@ def require_roles(*allowed_roles: str) -> Callable:
 require_admin = require_roles("ADMIN")
 require_supervisor_or_admin = require_roles("ADMIN", "SUPERVISOR")
 require_driver_or_above = require_roles("ADMIN", "SUPERVISOR", "DRIVER")
+
+
+def is_elevated_operator(user: User) -> bool:
+    return user.role in {"ADMIN", "SUPERVISOR"}
+
+
+def require_assigned_driver(current_user: User) -> User:
+    if current_user.role == "DRIVER" and current_user.driver_id is None:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="DRIVER users must be assigned to a driver before operational actions.",
+        )
+    return current_user
+
+
+def resolve_operational_driver_id(current_user: User, requested_driver_id):
+    require_assigned_driver(current_user)
+
+    if is_elevated_operator(current_user):
+        return requested_driver_id
+
+    if requested_driver_id is not None and requested_driver_id != current_user.driver_id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="DRIVER users can only operate with their assigned driver_id.",
+        )
+
+    return current_user.driver_id

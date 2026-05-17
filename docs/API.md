@@ -37,3 +37,36 @@ Authentication: bearer JWT unless endpoint is marked public.
 - Standard envelope responses are not currently enforced.
 - Error response standardization can be considered in a future API hardening sprint.
 - Auth and permission behavior is documented in `docs/PERMISSIONS.md`.
+
+## Fase 4 Driver Ownership Rules
+
+### `GET /api/auth/me`
+
+Response includes `driver_id` when the authenticated user is associated with a `Driver`.
+
+### `POST /api/users`
+
+`ADMIN` may create users. For `role=DRIVER`, `driver_id` is required and must reference an existing `drivers.id`. `ADMIN` and `SUPERVISOR` users may have `driver_id=null`.
+
+### `PATCH /api/users/{user_id}`
+
+`ADMIN` may update users. If the resulting role is `DRIVER`, the resulting `driver_id` must reference an existing `Driver`.
+
+### `POST /api/delivery-events`
+
+- `ADMIN` and `SUPERVISOR` may create events for any valid `driver_id`.
+- `DRIVER` must have `current_user.driver_id`.
+- `DRIVER` may omit `driver_id`; the API assigns the authenticated user's `driver_id`.
+- `DRIVER` may submit only their own `driver_id`.
+- `DRIVER` using another `driver_id` receives `403`.
+- Unknown `driver_id` receives `400`.
+
+### `POST /api/evidence/upload`
+
+Multipart fields now accept optional `driver_id`.
+
+- `ADMIN` and `SUPERVISOR` may upload evidence for any valid `driver_id` or omit it.
+- `DRIVER` must have `current_user.driver_id`.
+- `DRIVER` may omit `driver_id`; the event is associated to their own `driver_id`.
+- `DRIVER` using another `driver_id` receives `403`.
+- The created `DeliveryEvent` and corresponding `OrderState` are associated to the resolved `driver_id`.

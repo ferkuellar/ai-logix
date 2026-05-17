@@ -50,6 +50,7 @@ describe('Login', () => {
       email: 'admin@example.com',
       full_name: 'Admin User',
       role: 'ADMIN',
+      driver_id: null,
     })
     renderLogin()
 

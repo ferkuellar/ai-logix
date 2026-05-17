@@ -37,6 +37,8 @@ Measures access and security posture:
 - Unsafe production config blocking.
 - Wildcard CORS blocking.
 - Security config test health.
+- Driver ownership enforcement.
+- Driver cross-access denials.
 
 ### OCR / IA
 
@@ -90,6 +92,12 @@ Measures schema governance:
 - `backend_critical_flow_coverage`
 - `auth_test_coverage`
 - `permission_test_coverage`
+- `permission_regression_test_pass_rate`
+- `driver_user_assignment_coverage`
+- `driver_ownership_enforcement`
+- `driver_forbidden_cross_access_count`
+- `driver_operational_action_success_rate`
+- `driver_unassigned_user_count`
 - `evidence_upload_test_coverage`
 - `ocr_review_test_coverage`
 - `audit_log_test_coverage`

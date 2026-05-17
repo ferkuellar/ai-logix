@@ -4,9 +4,10 @@ from datetime import datetime
 from typing import Optional
 from uuid import UUID
 
-from app.api.dependencies import require_driver_or_above, require_supervisor_or_admin
+from app.api.dependencies import require_driver_or_above, require_supervisor_or_admin, resolve_operational_driver_id
 from app.db.session import get_db
 from app.models.delivery_event import DeliveryEvent
+from app.models.driver import Driver
 from app.models.order_state import OrderState
 from app.models.user import User
 from app.schemas.delivery_event import DeliveryEventCreate, DeliveryEventResponse
@@ -24,6 +25,16 @@ from app.services.audit_service import log_action
 router = APIRouter()
 
 
+def ensure_driver_exists(db: Session, driver_id: UUID | None) -> None:
+    if driver_id is None:
+        return
+    if not db.query(Driver).filter(Driver.id == driver_id).first():
+        raise HTTPException(
+            status_code=http_status.HTTP_400_BAD_REQUEST,
+            detail="driver_id does not reference an existing driver.",
+        )
+
+
 @router.get("/health")
 def health_check():
     return {
@@ -39,7 +50,11 @@ def create_delivery_event(
     db: Session = Depends(get_db),
     current_user: User = Depends(require_driver_or_above),
 ):
-    event = DeliveryEvent(**payload.model_dump())
+    data = payload.model_dump()
+    data["driver_id"] = resolve_operational_driver_id(current_user, data.get("driver_id"))
+    ensure_driver_exists(db, data["driver_id"])
+
+    event = DeliveryEvent(**data)
     db.add(event)
     db.commit()
     db.refresh(event)
@@ -60,7 +75,7 @@ def create_delivery_event(
 
         order_state.last_event_id = event.id
         order_state.store_id = payload.store_id
-        order_state.driver_id = payload.driver_id
+        order_state.driver_id = data["driver_id"]
         order_state.last_latitude = payload.latitude
         order_state.last_longitude = payload.longitude
         order_state.last_update_at = datetime.utcnow()
@@ -96,6 +111,7 @@ async def upload_evidence(
     latitude: Optional[float] = Form(None),
     longitude: Optional[float] = Form(None),
     observations: Optional[str] = Form(None),
+    driver_id: Optional[UUID] = Form(None),
     file: UploadFile = File(...),
     db: Session = Depends(get_db),
     current_user: User = Depends(require_driver_or_above),
@@ -107,10 +123,14 @@ async def upload_evidence(
             detail="order_number is required.",
         )
 
+    resolved_driver_id = resolve_operational_driver_id(current_user, driver_id)
+    ensure_driver_exists(db, resolved_driver_id)
+
     file_metadata = await save_evidence_file(file)
     event = create_photo_uploaded_event(
         db,
         order_number=order_number,
+        driver_id=resolved_driver_id,
         status_value=status,
         latitude=latitude,
         longitude=longitude,
@@ -123,7 +143,7 @@ async def upload_evidence(
         resource_type="delivery_event",
         resource_id=str(event.id),
         user=current_user,
-        metadata={"order_number": event.order_number, "photo_url": event.photo_url},
+        metadata={"order_number": event.order_number, "photo_url": event.photo_url, "driver_id": str(event.driver_id) if event.driver_id else None},
         ip_address=request.client.host if request.client else None,
     )
 

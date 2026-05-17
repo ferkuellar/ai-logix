@@ -8,6 +8,7 @@ from sqlalchemy.orm import Session
 
 from app.core.config import settings
 from app.models.user import User
+from app.models.driver import Driver
 
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -39,18 +40,49 @@ def get_user_by_id(db: Session, user_id: str | UUID) -> User | None:
     return db.query(User).filter(User.id == user_id).first()
 
 
-def create_user(db: Session, *, email: str, full_name: str, password: str, role: str) -> User:
+def validate_driver_assignment(db: Session, *, role: str, driver_id: UUID | None) -> None:
+    normalized_role = role.upper()
+    if normalized_role == "DRIVER" and driver_id is None:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="driver_id is required for DRIVER users.",
+        )
+
+    if driver_id is None:
+        return
+
+    driver = db.query(Driver).filter(Driver.id == driver_id).first()
+    if not driver:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="driver_id does not reference an existing driver.",
+        )
+
+
+def create_user(
+    db: Session,
+    *,
+    email: str,
+    full_name: str,
+    password: str,
+    role: str,
+    driver_id: UUID | None = None,
+) -> User:
     if get_user_by_email(db, email):
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
             detail="A user with this email already exists.",
         )
 
+    role = role.upper()
+    validate_driver_assignment(db, role=role, driver_id=driver_id)
+
     user = User(
         email=email.lower(),
         full_name=full_name,
         hashed_password=hash_password(password),
-        role=role.upper(),
+        role=role,
+        driver_id=driver_id,
         is_active=True,
     )
     db.add(user)

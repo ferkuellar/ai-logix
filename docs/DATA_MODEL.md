@@ -12,6 +12,14 @@ backend/alembic/versions/20260517_0001_baseline_schema.py
 
 The baseline represents the current SQLAlchemy model schema.
 
+Fase 4 adds:
+
+```text
+backend/alembic/versions/20260517_0002_add_user_driver_relationship.py
+```
+
+This migration adds `users.driver_id`, an index, and a foreign key to `drivers.id`.
+
 ## User
 
 Entity: `User`
@@ -26,6 +34,7 @@ Important fields:
 - `full_name`
 - `hashed_password`
 - `role`
+- `driver_id`
 - `is_active`
 - `created_at`
 - `updated_at`
@@ -33,20 +42,29 @@ Important fields:
 Relationships:
 
 - `audit_logs.user_id` references `users.id`.
+- `users.driver_id` references `drivers.id`.
+
+Cardinality:
+
+- A `DRIVER` user must be associated to exactly one active operational `Driver` in application logic.
+- `ADMIN` and `SUPERVISOR` may have `driver_id = null`.
+- The database does not currently enforce one-to-one uniqueness on `users.driver_id`; this avoids locking future staffing/business rules before assignment policy is finalized.
 
 Indexes / uniqueness:
 
 - `email` is unique and indexed.
+- `driver_id` is indexed.
 
 Risks:
 
 - Role is stored as a string without database enum/check constraint.
-- No formal relationship exists between `users` and `drivers`.
+- Historical users may have `driver_id = null`.
+- The role-to-driver requirement is enforced in application logic, not a database check constraint.
 
 Future improvements:
 
-- Evaluate `User` to `Driver` relationship.
 - Add role constraints or enum strategy.
+- Decide whether `users.driver_id` should become unique after operational staffing rules are confirmed.
 
 ## Driver
 
@@ -68,6 +86,7 @@ Important fields:
 Relationships:
 
 - `delivery_events.driver_id` references `drivers.id`.
+- `users.driver_id` references `drivers.id`.
 
 Indexes / uniqueness:
 
@@ -75,12 +94,11 @@ Indexes / uniqueness:
 
 Risks:
 
-- No enforced link from `users.role = DRIVER` to `drivers`.
-- Driver assignment rules are not formalized.
+- A user-driver relationship now exists, but route/order assignment beyond driver ownership is not yet formalized.
 
 Future improvements:
 
-- Define identity and assignment model for drivers.
+- Define order assignment and mobile-first driver workflow.
 
 ## Store
 
@@ -242,8 +260,9 @@ Future improvements:
 
 ## Known Data Model Gaps
 
-- Missing formal `User` to `Driver` relationship.
+- Historical `DeliveryEvent` and `OrderState` rows may have `driver_id = null`.
 - Missing formal `orders` table.
+- Missing formal order-to-driver assignment table.
 - Missing canonical order status catalog.
 - Flexible JSON fields require reporting discipline.
 - Evidence retention policy is undefined.

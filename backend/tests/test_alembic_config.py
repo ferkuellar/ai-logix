@@ -28,6 +28,17 @@ def test_baseline_migration_exists_with_upgrade_and_downgrade():
     assert "def downgrade()" in content
 
 
+def test_user_driver_relationship_migration_exists_with_upgrade_and_downgrade():
+    versions = BACKEND_ROOT / "alembic" / "versions"
+    migrations = list(versions.glob("*_add_user_driver_relationship.py"))
+
+    assert migrations
+    content = migrations[0].read_text(encoding="utf-8")
+    assert "def upgrade()" in content
+    assert "def downgrade()" in content
+    assert "driver_id" in content
+
+
 def test_metadata_contains_expected_tables():
     expected_tables = {
         "users",
@@ -39,3 +50,7 @@ def test_metadata_contains_expected_tables():
     }
 
     assert expected_tables.issubset(set(Base.metadata.tables))
+
+
+def test_user_metadata_contains_driver_id():
+    assert "driver_id" in Base.metadata.tables["users"].columns

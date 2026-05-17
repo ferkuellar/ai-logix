@@ -14,6 +14,8 @@ from fastapi.testclient import TestClient
 from app.db.base import Base
 from app.db.session import SessionLocal, engine
 from app.main import app
+from app.models.driver import Driver
+from app.models.user import User
 from app.services.evidence_service import EVIDENCE_DIR
 from app.services.auth_service import create_access_token, create_user
 
@@ -43,7 +45,19 @@ def anonymous_client():
     return TestClient(app)
 
 
-def seed_user(email: str, role: str, password: str = "Password123!"):
+def seed_driver(name: str = "Test Driver", phone: str = "5550000000"):
+    db = SessionLocal()
+    try:
+        driver = Driver(name=name, phone=phone, status="ACTIVE")
+        db.add(driver)
+        db.commit()
+        db.refresh(driver)
+        return driver
+    finally:
+        db.close()
+
+
+def seed_user(email: str, role: str, password: str = "Password123!", driver_id=None):
     db = SessionLocal()
     try:
         return create_user(
@@ -52,6 +66,7 @@ def seed_user(email: str, role: str, password: str = "Password123!"):
             full_name=f"{role.title()} User",
             password=password,
             role=role,
+            driver_id=driver_id,
         )
     finally:
         db.close()
@@ -75,7 +90,27 @@ def supervisor_user():
 
 @pytest.fixture()
 def driver_user():
-    return seed_user("driver@example.com", "DRIVER")
+    driver = seed_driver(name="Assigned Driver", phone="5550000001")
+    return seed_user("driver@example.com", "DRIVER", driver_id=driver.id)
+
+
+@pytest.fixture()
+def unassigned_driver_user():
+    db = SessionLocal()
+    try:
+        user = User(
+            email="unassigned-driver@example.com",
+            full_name="Unassigned Driver",
+            hashed_password="$2b$12$kno3ra1tg1Q9HSPKRQ9fQuZ8Uaa0QkE5D5hi8gyXk2Pj7GzKyi8aa",
+            role="DRIVER",
+            is_active=True,
+        )
+        db.add(user)
+        db.commit()
+        db.refresh(user)
+        return user
+    finally:
+        db.close()
 
 
 @pytest.fixture()

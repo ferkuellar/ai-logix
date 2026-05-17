@@ -12,6 +12,8 @@ Fase 5 agrega revision humana del OCR para confirmar o rechazar datos antes de a
 
 Fase 6 agrega autenticacion JWT, roles `ADMIN`/`SUPERVISOR`/`DRIVER`, proteccion de endpoints operativos y auditoria minima.
 
+Axon-AI Fase 4 agrega ownership operativo para `DRIVER`: cada usuario repartidor debe tener `driver_id`, solo puede crear eventos/subir evidencia para su propio repartidor, y `ADMIN`/`SUPERVISOR` mantienen alcance operativo global.
+
 Documentacion:
 
 - [docs/SECURITY.md](docs/SECURITY.md)
@@ -63,6 +65,13 @@ Alembic vive en `backend/`.
 ```bash
 docker compose exec backend alembic -c alembic.ini current
 docker compose exec backend alembic -c alembic.ini history
+docker compose exec backend alembic -c alembic.ini upgrade head
+```
+
+Si una base local fue creada antes de Alembic con tablas existentes, adoptar primero la baseline de desarrollo y luego aplicar head:
+
+```bash
+docker compose exec backend alembic -c alembic.ini stamp 20260517_0001
 docker compose exec backend alembic -c alembic.ini upgrade head
 ```
 

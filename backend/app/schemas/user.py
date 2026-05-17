@@ -13,6 +13,7 @@ class UserCreate(BaseModel):
     full_name: str
     password: str = Field(min_length=8)
     role: str
+    driver_id: Optional[UUID] = None
 
     @field_validator("email")
     @classmethod
@@ -34,6 +35,7 @@ class UserCreate(BaseModel):
 class UserUpdate(BaseModel):
     full_name: Optional[str] = None
     role: Optional[str] = None
+    driver_id: Optional[UUID] = None
     is_active: Optional[bool] = None
 
     @field_validator("role")
@@ -52,6 +54,7 @@ class UserResponse(BaseModel):
     email: str
     full_name: Optional[str] = None
     role: str
+    driver_id: Optional[UUID] = None
     is_active: bool
     created_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None

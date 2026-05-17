@@ -27,4 +27,5 @@ class CurrentUserResponse(BaseModel):
     email: str
     full_name: Optional[str] = None
     role: str
+    driver_id: Optional[UUID] = None
     is_active: bool

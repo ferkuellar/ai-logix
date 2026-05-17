@@ -106,6 +106,23 @@ docker compose exec backend alembic -c alembic.ini downgrade -1
 
 Review `docs/DATABASE_MIGRATIONS.md` before applying migrations to shared environments.
 
+Fase 4 adds `users.driver_id`. Existing development databases created before Alembic may need baseline adoption before applying the Fase 4 migration:
+
+```bash
+docker compose exec backend alembic -c alembic.ini history
+docker compose exec backend alembic -c alembic.ini current
+docker compose exec backend alembic -c alembic.ini upgrade head
+```
+
+If the local DB has baseline tables but no `alembic_version`, compare schema first, then stamp the baseline revision before applying the latest migration:
+
+```bash
+docker compose exec backend alembic -c alembic.ini stamp 20260517_0001
+docker compose exec backend alembic -c alembic.ini upgrade head
+```
+
+Do not stamp shared environments without schema verification and approval.
+
 ## Frontend Build And Lint
 
 ```bash

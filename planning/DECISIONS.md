@@ -30,6 +30,11 @@ Durable decisions are recorded here so future builders do not rely on chat histo
 | 2026-05-17 | OCR production providers are not used in tests. | Tests must be deterministic and must not depend on OpenAI or external services. | OCR tests force the mock provider. |
 | 2026-05-17 | Critical flows have priority over percentage coverage. | Fase 3 aims to prevent high-impact regressions, not chase full coverage. | Future test work should protect business-critical behavior first. |
 | 2026-05-17 | CI/CD test automation is deferred. | Fase 3 adds the suite and runbook, not full pipeline automation. | CI/CD remains a documented future DevOps phase. |
+| 2026-05-17 | `User.driver_id` is the formal user-to-driver relationship. | DRIVER users need a durable ownership link to operational driver records. | Backend can enforce driver-scoped actions. |
+| 2026-05-17 | DRIVER users must have an assigned driver to perform operational actions. | Unassigned driver users cannot be safely mapped to real operations. | DRIVER without `driver_id` receives `403` for delivery events and evidence upload. |
+| 2026-05-17 | ADMIN and SUPERVISOR retain global operational scope. | Supervisory/admin workflows require broad visibility and assignment control. | Elevated roles may create events/upload evidence for any valid driver. |
+| 2026-05-17 | DRIVER ownership is enforced by `driver_id` in Fase 4. | Order/route assignment is not yet formalized. | A DRIVER cannot operate another `driver_id`, but order-level assignment remains future work. |
+| 2026-05-17 | Mobile-first DRIVER workflow is deferred. | Fase 4 is backend ownership and minimal frontend regression only. | Dedicated driver UX should be handled in a later product phase. |
 
 ## Decision Maintenance
 
