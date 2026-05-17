@@ -33,6 +33,10 @@ Measures access and security posture:
 - Failed logins.
 - Audit coverage.
 - Default secret detection.
+- Environment template completeness.
+- Unsafe production config blocking.
+- Wildcard CORS blocking.
+- Security config test health.
 
 ### OCR / IA
 
@@ -68,6 +72,7 @@ Measures engineering health:
 - `api_health_status`
 - `backend_startup_success`
 - `frontend_build_success`
+- `frontend_lint_success`
 - `secrets_in_repo_count`
 - `upload_success_rate`
 - `ocr_processed_count`
@@ -81,6 +86,10 @@ Measures engineering health:
 - `protected_endpoint_coverage`
 - `audit_log_critical_action_coverage`
 - `default_secret_detected`
+- `env_example_completeness`
+- `unsafe_production_config_blocked`
+- `cors_wildcard_blocked`
+- `config_security_tests_passed`
 - `migration_status`
 - `human_review_sla_minutes`
 - `ocr_failed_count`

@@ -18,14 +18,57 @@
 | Frontend build | `cd frontend && npm run build` | Exit code 0. | Not executed | No frontend code changed. |
 | Frontend lint | `cd frontend && npm run lint` | Exit code 0. | Not executed | No frontend code changed. |
 | Metrics | Compare `planning/METRICS.md` and `docs/METRICS.md`. | Required categories and metrics defined. | Passed | Metrics definitions complete; instrumentation gaps documented. |
+| Fase 1 config tests | `python -m pytest backend/tests/test_config_security.py` | All config security tests pass. | Passed | 7 passed; validates unsafe non-development settings are rejected. |
+| Backend local tests | `python -m pytest backend/tests` | All backend tests pass. | Passed | 31 passed; warnings documented as residual maintenance risk. |
+| Frontend build | `cd frontend && npm run build` | Production build succeeds. | Passed | Executed after removing default password from login form. |
+| Frontend lint | `cd frontend && npm run lint` | ESLint exits 0. | Passed | Executed after frontend security adjustment. |
+| `.gitignore` secrets check | `git check-ignore --no-index -v .env` | `.env` is ignored. | Passed | `.env` remains untracked. |
+| Unsafe config validation | Unit tests instantiate `Settings` with production defaults. | ValidationError without printing secret value. | Passed | Covers secret key, seed password, wildcard CORS, secure config. |
 
 ## Executed Commands
 
 ```bash
 docker compose config
+python -m pytest backend/tests/test_config_security.py
+python -m pytest backend/tests
+cd frontend
+npm run build
+npm run lint
 ```
 
 Result: passed.
+
+## Fase 1 Commands Not Executed
+
+### `docker compose up --build`
+
+Result: not executed.
+
+Cause: Fase 1 changed settings validation, Compose defaults, docs, and focused config tests. Full runtime startup is useful but not required to prove config validation.
+
+Impact: Full stack startup remains to be revalidated before demo or Fase 2 closure.
+
+Next action: run `docker compose up --build` before demo or before merging code-bearing Fase 2 work.
+
+### `docker compose exec backend pytest`
+
+Result: not executed.
+
+Cause: The backend container was not started in this validation pass. The full backend suite was run locally with `python -m pytest backend/tests`.
+
+Impact: Docker-container parity for backend tests was not refreshed. Local backend tests passed.
+
+Next action: run full backend tests once the Docker stack is running.
+
+### `cd frontend && npm install`
+
+Result: not executed.
+
+Cause: Existing frontend dependencies were already available; package files were not changed.
+
+Impact: Dependency installation path was not revalidated. `npm run build` and `npm run lint` both passed.
+
+Next action: run `npm install` in a clean environment or CI.
 
 ## Commands Not Executed
 

@@ -10,11 +10,11 @@ AI Logix
 
 ## Current Phase
 
-Fase 0 - Foundation Metrics
+Fase 1 - Seguridad, configuracion y secretos
 
 ## Status
 
-Completed for documentation and operating-system scope. Runtime build/tests beyond `docker compose config` are documented as not executed because Phase 0 changed documentation, ignore rules, and environment template only.
+Completed for security, configuration, and secrets scope. Runtime configuration now blocks unsafe non-development settings for `SECRET_KEY`, `SEED_ADMIN_PASSWORD`, missing `DATABASE_URL`, and wildcard CORS.
 
 ## Detected Stack
 
@@ -42,9 +42,12 @@ Completed for documentation and operating-system scope. Runtime build/tests beyo
 
 All required Phase 0 acceptance criteria are complete as documented in `planning/sprints/000-foundation-metrics/acceptance.md`.
 
+All required Phase 1 acceptance criteria are complete as documented in `planning/sprints/001-security-configuration/acceptance.md`.
+
 ## Validation Status
 
 - `docker compose config`: passed.
+- `python -m pytest backend/tests/test_config_security.py`: passed.
 - Required file existence: passed.
 - Empty required file check: passed.
 - Placeholder search in Phase 0 files: passed after converting uncertainty into questions/risks.
@@ -54,12 +57,12 @@ All required Phase 0 acceptance criteria are complete as documented in `planning
 
 ## Blockers
 
-No blockers remain for closing Phase 0. Several production-readiness items are open risks and should move into Phase 1 or later.
+No blockers remain for closing Phase 1. Several production-readiness items are open risks and should move into Phase 2 or later.
 
 ## Open Risks
 
 - No formal migrations.
-- Development defaults must be rotated before staging/production.
+- Development defaults are blocked outside development for critical settings, but actual secret management and rotation process still need CI/deployment integration.
 - `/uploads` is served by FastAPI and needs production access policy.
 - Login lacks rate limiting.
 - Evidence retention is undefined.
@@ -69,13 +72,12 @@ No blockers remain for closing Phase 0. Several production-readiness items are o
 
 ## Recommended Next Phase
 
-Fase 1 - Seguridad, configuracion y secretos.
+Fase 2 - Migraciones Alembic y modelo de datos estable.
 
 Recommended focus:
 
-- Remove default development secrets from operational use.
-- Add secret scanning and CI checks.
-- Define environment separation.
-- Add login rate limiting.
-- Harden upload exposure and CORS.
-- Start migration strategy.
+- Add Alembic migration workflow.
+- Create baseline migration for current schema.
+- Validate schema creation through migrations instead of `Base.metadata.create_all` for non-local environments.
+- Review referential integrity gaps.
+- Document migration commands and rollback policy.

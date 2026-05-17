@@ -4,9 +4,10 @@ services:
     container_name: ailogix_postgres
     restart: always
     environment:
-      POSTGRES_DB: ailogix
-      POSTGRES_USER: ailogix_user
-      POSTGRES_PASSWORD: ailogix_password
+      # Local development defaults only. Override these values outside development.
+      POSTGRES_DB: ${POSTGRES_DB:-ailogix}
+      POSTGRES_USER: ${POSTGRES_USER:-ailogix_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-ailogix_password}
     ports:
       - "5432:5432"
     volumes:

@@ -4,7 +4,7 @@ import { useAuth } from '../auth/useAuth'
 export default function Login() {
   const { login } = useAuth()
   const [email, setEmail] = useState('admin@ailogix.local')
-  const [password, setPassword] = useState('ChangeMe123!')
+  const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 

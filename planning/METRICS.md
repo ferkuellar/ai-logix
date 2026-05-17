@@ -30,6 +30,10 @@
 | `failed_login_count` | Seguridad | Track suspicious auth failures. | Count `LOGIN_FAILED` audit logs. | Security/Ops | Alert threshold pending | Measurable. | `audit_logs` | Daily in production | Brute force may go unnoticed. |
 | `audit_log_critical_action_coverage` | Seguridad | Ensure critical actions are audited. | Audited critical actions / defined critical actions. | Security | 100% after critical-action list exists | Partial. | Code + `audit_logs` | Sprint close | Forensics gaps. |
 | `default_secret_detected` | Seguridad | Detect unsafe config. | Check `.env`/runtime values for known defaults. | Security/DevOps | False | `.env.example` intentionally contains sample placeholders; runtime not scanned. | Config/secret scan | Every deploy | Default credentials can reach production. |
+| `env_example_completeness` | Seguridad | Ensure environment template documents required settings. | Required variables present in `.env.example` / required variables list. | Engineering/DevOps | 100% | 100% for Fase 1 required variables. | File review | Every config change | Missing variables slow setup or cause unsafe defaults. |
+| `unsafe_production_config_blocked` | Seguridad | Confirm unsafe non-development config fails fast. | Config tests for production/default secret/default seed/missing DB/wildcard CORS. | Security/Engineering | True | True; tests added in Fase 1. | Pytest | Every config change | Unsafe deployments may start. |
+| `cors_wildcard_blocked` | Seguridad | Confirm wildcard CORS is rejected outside development. | Config test with `APP_ENV=production` and `CORS_ORIGINS=*`. | Security/Engineering | True | True; test added in Fase 1. | Pytest | Every config change | Cross-origin exposure can expand unexpectedly. |
+| `config_security_tests_passed` | Seguridad | Track security config test health. | `python -m pytest backend/tests/test_config_security.py` exits 0. | Engineering/QA | 100% | 100%; 7/7 passed in Fase 1. | Pytest | Every config change | Config regressions can ship. |
 
 ## OCR / IA
 
@@ -46,8 +50,8 @@
 
 | Name | Category | Purpose | Formula / Validation Method | Owner | Target | Current Baseline | Data Source | Frequency | Risk if Ignored |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| `backend_test_pass_rate` | Calidad | Track backend correctness. | Passing pytest tests / total pytest tests. | Engineering/QA | 100% | Not run in Phase 0. | Pytest | Every backend change | Regressions can ship. |
-| `frontend_build_success` | Calidad | Confirm frontend compiles. | `npm run build` exits 0. | Frontend Engineering | 100% | Not run in Phase 0. | npm/Vite | Every frontend change | Broken UI build. |
-| `frontend_lint_success` | Calidad | Confirm frontend lint health. | `npm run lint` exits 0. | Frontend Engineering | 100% | Not run in Phase 0. | npm/ESLint | Every frontend change | Maintainability defects accumulate. |
+| `backend_test_pass_rate` | Calidad | Track backend correctness. | Passing pytest tests / total pytest tests. | Engineering/QA | 100% | 100%; 31/31 passed in Fase 1 local pytest. | Pytest | Every backend change | Regressions can ship. |
+| `frontend_build_success` | Calidad | Confirm frontend compiles. | `npm run build` exits 0. | Frontend Engineering | 100% | Passed in Fase 1. | npm/Vite | Every frontend change | Broken UI build. |
+| `frontend_lint_success` | Calidad | Confirm frontend lint health. | `npm run lint` exits 0. | Frontend Engineering | 100% | Passed in Fase 1. | npm/ESLint | Every frontend change | Maintainability defects accumulate. |
 | `migration_status` | Calidad | Track schema-change safety. | Migration tool present and migrations apply cleanly. | Engineering/DevOps | Formal migrations before production | No formal migrations detected. | Repo/DB | Every schema change | Unsafe schema evolution. |
 | `docs_completeness_score` | Calidad | Measure required docs coverage. | Existing required docs / required docs. | Architecture/PM | 100% for Phase 0 | 100% for required Phase 0 docs. | File check | Sprint close | Future builders lack context. |

@@ -30,6 +30,25 @@ docker compose exec backend python -m app.scripts.seed_admin
 
 Use development-only credentials from local `.env`. Rotate before any shared environment.
 
+## Non-Development Configuration
+
+For any environment where `APP_ENV` is not `development`, configure:
+
+- `DATABASE_URL` with the target database URL.
+- `SECRET_KEY` with a random value at least 32 characters long.
+- `SEED_ADMIN_PASSWORD` with a non-default value at least 12 characters long.
+- `CORS_ORIGINS` with explicit origins, never `*`.
+
+The backend fails at startup if these settings are unsafe. Expected error examples:
+
+```text
+Unsafe production configuration: SECRET_KEY must be changed for non-development environments.
+Unsafe production configuration: SEED_ADMIN_PASSWORD must be changed for non-development environments.
+Unsafe production configuration: CORS_ORIGINS cannot include '*' for non-development environments.
+```
+
+The error names the unsafe setting but does not print secret values.
+
 ## Healthcheck
 
 ```bash
@@ -90,6 +109,7 @@ Use volume deletion only when local data loss is acceptable.
 ## Checklist Before Demo
 
 - `docker compose config` passes.
+- Security config tests pass.
 - `docker compose up --build` starts all services.
 - Admin seed works with demo-only credentials.
 - Frontend opens at `http://localhost:5173`.

@@ -14,6 +14,9 @@ Fase 6 agrega autenticacion JWT, roles `ADMIN`/`SUPERVISOR`/`DRIVER`, proteccion
 
 Documentacion:
 
+- [docs/SECURITY.md](docs/SECURITY.md)
+- [docs/OPERATIONS.md](docs/OPERATIONS.md)
+- [docs/VALIDATION.md](docs/VALIDATION.md)
 - [docs/fase-2-frontend-map.md](docs/fase-2-frontend-map.md)
 - [docs/fase-3-subida-fotos.md](docs/fase-3-subida-fotos.md)
 - [docs/fase-4-ocr-ia.md](docs/fase-4-ocr-ia.md)
@@ -28,6 +31,17 @@ docker compose up --build
 
 - Backend: `http://localhost:8000`
 - Frontend: `http://localhost:5173`
+
+## Configuracion
+
+Crear `.env` desde `.env.example` y no subir `.env` al repositorio.
+
+En ambientes fuera de `development`, la app bloquea configuraciones inseguras:
+
+- `SECRET_KEY` default, vacio o menor a 32 caracteres.
+- `SEED_ADMIN_PASSWORD` default, vacio o menor a 12 caracteres.
+- `CORS_ORIGINS=*`.
+- `DATABASE_URL` faltante.
 
 ## Seed admin
 

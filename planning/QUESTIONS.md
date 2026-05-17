@@ -15,3 +15,5 @@
 | Que ambiente sera primero: dev, staging o produccion? | Engineering/DevOps | Phase 1 | Open | Required for secrets, CORS, deployment, and CI/CD design. |
 | Se debe mantener `/uploads` publico en local solamente? | Security/Engineering | Phase 1 | Open | Current architecture serves uploads statically through FastAPI. |
 | Que acciones adicionales deben auditarse? | Security/Product | Phase 1 | Open | Current audit coverage is minimal but useful. |
+| Que herramienta de secret scanning debe usarse en CI/CD? | Security/DevOps | Phase 2 | Open | Candidate tools include Gitleaks or equivalent. |
+| Debe existir un proceso para deshabilitar seed admin fuera de development? | Security/Ops | Before staging | Open | Fase 1 blocks weak seed password but does not remove seed flow. |
