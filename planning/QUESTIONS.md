@@ -20,3 +20,7 @@
 | Existing databases creadas con `create_all` deben ser stamped o recreadas localmente? | Engineering/DevOps | Before shared DB migration | Open | Decide per environment after schema comparison. |
 | Que indices se necesitan para consultas frecuentes de `delivery_events` y `audit_logs`? | Engineering/Ops | Before performance hardening | Open | Baseline preserves current model; query-driven indexes come later. |
 | Cuando se formalizara una tabla `orders`? | Product/Engineering | Future data model phase | Open | Current system uses `order_number` string. |
+| Que warning cleanup se prioriza primero: Pydantic Config o timestamps UTC? | Engineering | Fase 4 or maintenance sprint | Open | Fase 3 leaves backend tests passing but noisy. |
+| En que fase se agrega CI/CD para ejecutar backend/frontend tests? | DevOps/Engineering | Before production hardening | Open | Fase 3 documents commands but does not automate them. |
+| Debe auditarse `OCR_CONFIRMED` como accion critica separada? | Security/Product | Before audit hardening | Open | Fase 3 covers implemented audit actions and documents this gap. |
+| Se requiere prueba E2E browser para dashboard/mapa antes de demo? | Product/Engineering | Before client/demo readiness | Open | Frontend tests mock Leaflet and API. |

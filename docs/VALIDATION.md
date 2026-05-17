@@ -101,6 +101,32 @@ Next action: run `npm install` in a clean environment or CI.
 | `docker compose exec backend pytest` | Failed/documented | `ModuleNotFoundError: No module named 'app'` | Direct pytest command did not set import path in container. | Command alias is not reliable in current container. | Use `docker compose exec backend python -m pytest`. |
 | `docker compose exec backend python -m pytest` | Passed, 34 tests | None | Not applicable | Backend tests pass in Docker. | Use this command in docs/CI. |
 
+## Fase 3 Validation Results
+
+| Command / Method | Expected Result | Actual Result | Status | Notes |
+| --- | --- | --- | --- | --- |
+| Precheck Fase 0/Fase 1/Fase 2 | Required prior files exist. | All required files exist; no nested `ai-logix/ai-logix`. | Passed | Fase 3 proceeded. |
+| Existing backend test audit | Identify coverage, gaps, fixtures, warnings. | Existing 34 tests covered auth, evidence, OCR, review, config, Alembic; gaps closed with new tests. | Passed | Audit summarized in `docs/TESTING.md` and Fase 3 audit. |
+| Backend local tests | `python -m pytest backend/tests` exits 0. | 49 passed, 235 warnings. | Passed | Warnings are Pydantic class Config, `datetime.utcnow`, jose/passlib deprecations. |
+| Backend Docker tests | `docker compose exec backend python -m pytest` exits 0. | 49 passed, 173 warnings. | Passed | Canonical Docker test command. |
+| Frontend dependency install | `npm install` exits 0. | Added test dependencies; 0 vulnerabilities. | Passed | Initial attempt failed on unavailable package version; corrected to published versions. |
+| Frontend tests | `npm run test` exits 0. | 3 files passed, 8 tests passed. | Passed | API and Leaflet are mocked. |
+| Frontend build | `npm run build` exits 0. | Vite build succeeded. | Passed | Production bundle generated under `frontend/dist`. |
+| Frontend lint | `npm run lint` exits 0. | ESLint succeeded. | Passed | Test files lint clean. |
+| Docker Compose config | `docker compose config` exits 0. | Compose rendered successfully. | Passed | Development defaults remain visible. |
+| OCR mock validation | Backend OCR tests use mock provider. | OCR process/result/confirm tests passed. | Passed | No OpenAI call used. |
+| Upload validation | Valid, MIME invalid, magic bytes invalid, missing order number. | Upload tests passed. | Passed | Upload test files are cleaned by fixture. |
+| Permission validation | Role-based access checks for order states, review, users, OCR. | Permission tests passed. | Passed | DRIVER restrictions remain documented for Fase 4 hardening. |
+| AuditLog validation | Critical implemented audit actions are asserted. | Login success/failure, evidence upload, OCR processed, review confirm/reject covered. | Passed with note | OCR confirm endpoint itself does not create an audit log; recorded as residual audit coverage gap. |
+
+## Fase 3 Failures And Corrections
+
+| Command | Result | Error | Probable Cause | Impact | Next Action |
+| --- | --- | --- | --- | --- | --- |
+| `npm install` first attempt | Failed | No matching version for `@testing-library/react@^16.4.0`. | Requested package version was unavailable. | Frontend tests could not run until dependency version was corrected. | Changed to `@testing-library/react@^16.3.0`; install passed. |
+| `python -m pytest backend/tests` first Fase 3 run | Failed, 48 passed/1 failed | Assertion expected `provider` in response model. | `OcrProcessResponse` strips extra response fields not defined in schema. | Test assertion was too specific for current API contract. | Asserted stable response field `ocr_text`; suite passed. |
+| `npm run test` first Fase 3 runs | Failed | Missing cleanup between tests and duplicate text matches. | Testing Library cleanup was not configured for Vitest. | DOM leaked between tests. | Added cleanup in `frontend/src/test/setup.js`; tests passed. |
+
 ## Commands Not Executed
 
 ### `docker compose up --build`

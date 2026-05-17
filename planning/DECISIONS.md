@@ -25,6 +25,11 @@ Durable decisions are recorded here so future builders do not rely on chat histo
 | 2026-05-17 | Applied migrations must not be edited. | Editing applied revisions breaks migration history in shared environments. | Create a new revision for fixes after a migration is shared/applied. |
 | 2026-05-17 | Production requires backup before destructive migrations. | Destructive schema changes can cause irreversible data loss. | Migration runbooks must include backup/restore checks before production changes. |
 | 2026-05-17 | `User` to `Driver` relationship remains deferred. | The business assignment model is not defined yet. | Evaluate in a future data model or workflow phase without inventing rules in Fase 2. |
+| 2026-05-17 | Pytest is the official backend test framework. | Existing backend tests already use pytest and FastAPI TestClient. | Backend regression coverage should remain centered on pytest. |
+| 2026-05-17 | Vitest and Testing Library are the official frontend component test tools. | They fit Vite/React and allow fast component tests with mocked APIs. | Frontend critical flows can be tested without a browser E2E stack. |
+| 2026-05-17 | OCR production providers are not used in tests. | Tests must be deterministic and must not depend on OpenAI or external services. | OCR tests force the mock provider. |
+| 2026-05-17 | Critical flows have priority over percentage coverage. | Fase 3 aims to prevent high-impact regressions, not chase full coverage. | Future test work should protect business-critical behavior first. |
+| 2026-05-17 | CI/CD test automation is deferred. | Fase 3 adds the suite and runbook, not full pipeline automation. | CI/CD remains a documented future DevOps phase. |
 
 ## Decision Maintenance
 

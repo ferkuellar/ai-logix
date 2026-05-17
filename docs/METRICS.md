@@ -53,10 +53,13 @@ Measures OCR/AI usefulness and risk:
 Measures engineering health:
 
 - Backend tests.
+- Backend critical flow coverage.
+- Frontend tests.
 - Frontend build.
 - Frontend lint.
 - Migration status.
 - Documentation completeness.
+- Warning noise.
 
 ### Database
 
@@ -83,6 +86,14 @@ Measures schema governance:
 - `backend_startup_success`
 - `frontend_build_success`
 - `frontend_lint_success`
+- `frontend_test_pass_rate`
+- `backend_critical_flow_coverage`
+- `auth_test_coverage`
+- `permission_test_coverage`
+- `evidence_upload_test_coverage`
+- `ocr_review_test_coverage`
+- `audit_log_test_coverage`
+- `warning_noise_count`
 - `secrets_in_repo_count`
 - `upload_success_rate`
 - `ocr_processed_count`

@@ -28,6 +28,21 @@ def test_ocr_process_mock_provider(client):
     assert body["ai_extracted_json"]["status_suggestion"] == "DELIVERED"
 
 
+def test_ocr_result_returns_processed_payload(client):
+    event_id = upload_evidence(client, order_number="OX-OCR-RESULT")
+    processed = client.post(f"/api/ocr/process/{event_id}")
+    assert processed.status_code == 200
+
+    response = client.get(f"/api/ocr/result/{event_id}")
+
+    assert response.status_code == 200
+    body = response.json()
+    assert body["event_id"] == event_id
+    assert body["order_number"] == "OX-OCR-RESULT"
+    assert body["ocr_text"]
+    assert body["ai_extracted_json"]["review_status"] == "HUMAN_REVIEW_REQUIRED"
+
+
 def test_ocr_process_missing_event(client):
     response = client.post("/api/ocr/process/00000000-0000-0000-0000-000000000000")
 

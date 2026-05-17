@@ -61,6 +61,18 @@ Expected result: backend returns status ok.
 
 ```bash
 docker compose exec backend pytest
+docker compose exec backend python -m pytest
+python -m pytest backend/tests
+```
+
+Use `docker compose exec backend python -m pytest` as the canonical Docker command because direct `pytest` can miss the `/app` import path in this container.
+
+## Frontend Tests
+
+```bash
+cd frontend
+npm install
+npm run test
 ```
 
 ## Database Migrations
@@ -99,9 +111,27 @@ Review `docs/DATABASE_MIGRATIONS.md` before applying migrations to shared enviro
 ```bash
 cd frontend
 npm install
+npm run test
 npm run build
 npm run lint
 ```
+
+## Testing Before Handoff
+
+Before closing a sprint that changes backend, frontend, configuration, or database behavior:
+
+```bash
+docker compose config
+python -m pytest backend/tests
+docker compose exec backend python -m pytest
+cd frontend
+npm install
+npm run test
+npm run build
+npm run lint
+```
+
+Record failures, warning noise, probable cause, impact, and next action in `docs/VALIDATION.md` and the phase audit.
 
 ## Logs
 

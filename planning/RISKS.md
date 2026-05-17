@@ -22,6 +22,12 @@
 | Downgrade support can be limited for future data-changing migrations. | Medium | Rollback may not restore transformed/deleted data. | High | Require backup and explicit rollback notes before destructive migrations. | DevOps/Engineering | Open |
 | Migrations are not automated in CI/CD. | High | Migration drift may be missed before merge/deploy. | High | Add CI checks in a future phase for migration history and tests. | DevOps | Open |
 | Backup/restore is not implemented. | Medium | Production migration rollback may be unsafe. | High | Define backup/restore before production migrations. | DevOps/Ops | Open |
+| Suite backend can diverge from PostgreSQL behavior. | Medium | SQLite in-memory tests may miss PostgreSQL-specific issues. | Medium | Keep Docker/PostgreSQL smoke validation and add DB-specific tests in future CI. | Engineering/QA | Open |
+| Frontend tests mock Leaflet. | Medium | Map rendering issues may not be caught by component tests. | Low | Add targeted browser/E2E smoke later if map UX becomes critical. | Frontend Engineering | Open |
+| Critical coverage is not full coverage. | High | Untested secondary flows can still regress. | Medium | Expand tests by risk in future sprints. | Engineering/QA | Open |
+| Warning noise remains high. | High | Real warnings can be missed among deprecation noise. | Medium | Migrate Pydantic Config and UTC timestamp usage in a maintenance sprint. | Engineering | Open |
+| OCR confirm action lacks explicit AuditLog coverage. | Medium | Some OCR confirmation decisions may be harder to trace. | Medium | Decide whether `OCR_CONFIRMED` should be logged in a future audit hardening phase. | Security/Engineering | Open |
+| CI/CD does not run the new suite automatically. | High | Regressions can still merge if commands are skipped manually. | High | Add GitHub Actions or equivalent in a future CI/CD phase. | DevOps | Open |
 
 ## Review Cadence
 

@@ -17,6 +17,7 @@ Documentacion:
 - [docs/SECURITY.md](docs/SECURITY.md)
 - [docs/OPERATIONS.md](docs/OPERATIONS.md)
 - [docs/VALIDATION.md](docs/VALIDATION.md)
+- [docs/TESTING.md](docs/TESTING.md)
 - [docs/DATABASE_MIGRATIONS.md](docs/DATABASE_MIGRATIONS.md)
 - [docs/fase-2-frontend-map.md](docs/fase-2-frontend-map.md)
 - [docs/fase-3-subida-fotos.md](docs/fase-3-subida-fotos.md)
@@ -63,4 +64,23 @@ Alembic vive en `backend/`.
 docker compose exec backend alembic -c alembic.ini current
 docker compose exec backend alembic -c alembic.ini history
 docker compose exec backend alembic -c alembic.ini upgrade head
+```
+
+## Tests
+
+Backend:
+
+```bash
+python -m pytest backend/tests
+docker compose exec backend python -m pytest
+```
+
+Frontend:
+
+```bash
+cd frontend
+npm install
+npm run test
+npm run build
+npm run lint
 ```

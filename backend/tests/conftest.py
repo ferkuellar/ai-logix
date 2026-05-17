@@ -14,14 +14,28 @@ from fastapi.testclient import TestClient
 from app.db.base import Base
 from app.db.session import SessionLocal, engine
 from app.main import app
+from app.services.evidence_service import EVIDENCE_DIR
 from app.services.auth_service import create_access_token, create_user
+
+
+def clean_test_evidence_uploads():
+    if not EVIDENCE_DIR.exists():
+        return
+
+    for item in EVIDENCE_DIR.iterdir():
+        if item.name.startswith("."):
+            continue
+        if item.is_file():
+            item.unlink()
 
 
 @pytest.fixture(autouse=True)
 def reset_database():
     Base.metadata.drop_all(bind=engine)
     Base.metadata.create_all(bind=engine)
+    clean_test_evidence_uploads()
     yield
+    clean_test_evidence_uploads()
 
 
 @pytest.fixture()

@@ -10,17 +10,17 @@ AI Logix
 
 ## Current Phase
 
-Fase 2 - Migraciones Alembic y modelo de datos estable
+Fase 3 - Tests criticos backend/frontend
 
 ## Status
 
-Completed for Alembic migration baseline and data model stabilization scope. The backend now has formal Alembic migration files, a baseline schema migration, and `Base.metadata.create_all` is restricted to development compatibility.
+Completed for critical backend/frontend regression scope. The backend now has 49 passing tests covering health, auth, permissions, evidence, OCR, review, AuditLog, config, and Alembic. The frontend now has Vitest/Testing Library coverage for app render, login, auth/localStorage, and dashboard API mocking.
 
 ## Detected Stack
 
 - Backend: FastAPI, SQLAlchemy, Pydantic settings, Pytest.
 - Database: PostgreSQL through Docker Compose.
-- Frontend: React, Vite, TailwindCSS, Axios, Leaflet.
+- Frontend: React, Vite, TailwindCSS, Axios, Leaflet, Vitest, Testing Library.
 - Auth: JWT bearer tokens.
 - RBAC: `ADMIN`, `SUPERVISOR`, `DRIVER`.
 - Evidence: local upload storage under `backend/uploads`.
@@ -46,14 +46,20 @@ All required Phase 1 acceptance criteria are complete as documented in `planning
 
 All required Phase 2 acceptance criteria are complete as documented in `planning/sprints/002-alembic-data-model/acceptance.md`.
 
+All required Phase 3 acceptance criteria are complete as documented in `planning/sprints/003-critical-tests/acceptance.md`.
+
 ## Validation Status
 
 - `docker compose config`: passed.
 - `docker compose up --build -d`: passed; local containers started.
 - `python -m pytest backend/tests/test_config_security.py`: passed in Fase 1.
 - `python -m pytest backend/tests/test_alembic_config.py`: passed, 3 tests.
-- `python -m pytest backend/tests`: passed, 34 tests.
-- `docker compose exec backend python -m pytest`: passed, 34 tests.
+- `python -m pytest backend/tests`: passed, 49 tests in Fase 3.
+- `docker compose exec backend python -m pytest`: passed, 49 tests in Fase 3.
+- `cd frontend; npm install`: passed after correcting unavailable test dependency version.
+- `cd frontend; npm run test`: passed, 8 tests.
+- `cd frontend; npm run build`: passed.
+- `cd frontend; npm run lint`: passed.
 - `cd backend; python -m alembic -c alembic.ini history`: passed.
 - `docker compose exec backend alembic -c alembic.ini history`: passed.
 - `docker compose exec backend alembic -c alembic.ini current`: passed with no revision displayed because the local DB is not stamped.
@@ -61,10 +67,11 @@ All required Phase 2 acceptance criteria are complete as documented in `planning
 - Required file existence: passed.
 - Empty required file check: passed.
 - Placeholder search in Phase 2 files: passed.
+- Fase 3 warning noise remains: backend local emitted 235 warnings and Docker emitted 173 warnings, primarily Pydantic class Config and `datetime.utcnow` deprecations.
 
 ## Blockers
 
-No blockers remain for closing Phase 2 after validation is recorded. Several production-readiness items are open risks and should move into Phase 3 or later.
+No blockers remain for closing Phase 3. CI/CD automation and warning reduction remain future work.
 
 ## Open Risks
 
@@ -76,14 +83,17 @@ No blockers remain for closing Phase 2 after validation is recorded. Several pro
 - CI/CD is missing.
 - Order status taxonomy is not formalized.
 - Human review SLA is undefined.
+- Backend warning noise is high and should be reduced.
+- CI/CD does not run the new test suite automatically.
+- Frontend tests mock Leaflet and do not replace browser/E2E validation.
 
 ## Recommended Next Phase
 
-Fase 3 - Tests criticos backend/frontend.
+Fase 4 - Permisos DRIVER reales y asignacion operativa.
 
 Recommended focus:
 
-- Promote critical backend workflows into a stable regression suite.
-- Add frontend tests for auth and core views.
-- Add migration validation tests to CI plan.
-- Reduce warning noise that can hide real failures.
+- Define formal `User` to `Driver` relationship.
+- Enforce driver ownership/assignment for operational actions.
+- Clarify which driver can create/update events for each order.
+- Keep current critical tests passing while hardening permissions.

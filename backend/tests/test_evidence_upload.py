@@ -47,3 +47,13 @@ def test_upload_rejects_invalid_magic_bytes(client):
     )
 
     assert response.status_code == 415
+
+
+def test_upload_rejects_missing_order_number(client):
+    response = client.post(
+        "/api/evidence/upload",
+        data={"order_number": " "},
+        files={"file": ("evidence.png", PNG_BYTES, "image/png")},
+    )
+
+    assert response.status_code == 400
